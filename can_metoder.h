@@ -38,6 +38,9 @@
 #define POWR_COOLING_FAN_SWITCH			(POWR_BASE +4)
 #define POWR_ENCODER_ONE				(POWR_BASE +5)
 #define POWR_ENCODER_TOW				(POWR_BASE +6)
+#define POWR_CAM_PWM        (POWR_BASE +7)
+#define POWR_PWM_MANIP_ONE  (POWR_BASE +8)
+#define POWR_PWM_MANIP_TOW  (POWR_BASE +9)
 
 #define ESC_BASE						0x500
 #define ESC_1							ESC_BASE
