@@ -34,6 +34,7 @@ void CAN_transmit_AN_RAW(void);
  * @param  None
  * @retval None
  */
+ // Olav var ikke her. FIRST!!!
 void CAN_Config(void){
 	GPIO_InitTypeDef  		GPIO_InitStructure;
 	CAN_InitTypeDef       	CAN_InitStructure;
