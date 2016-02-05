@@ -1,4 +1,4 @@
-/**
+	/**
   **************************************************************************************
   * @file    CAN_metoder.c
   * @author  Sivert Sliper, Stian Soerensen
@@ -10,21 +10,27 @@
 
 /* Include------------------------------------------------------------------------------*/
 #include "can_metoder.h"
+#include "stm32f30x_can.h"
+#include "stm32f30x_rcc.h"
+#include "stm32f30x_gpio.h"
+#include "stm32f30x_misc.h"
 
 /* Global variables --------------------------------------------------------------------*/
 #include "extern_decl_global_vars.h"
 
 
-/* Function declarations ---------------------------------------------------------------*/
-void CAN_Config(void);
-void Init_RxMes(CanRxMsg *RxMessage);
-void confirm_message(void);
-void CAN_IT_Config(void);
-uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
-uint8_t CAN_getRxMessages(void);
-uint16_t ADC1_getChannel(uint8_t channel);
-uint16_t ADC4_getChannel(uint8_t channel);
-void CAN_transmit_AN_RAW(void);
+/* Static Function declarations --------------------------------------------------------*/
+
+/* Private variables -------------------------------------------------------------------*/
+CanRxMsg RxMsg;
+CanTxMsg TxMsg = {0};
+uint8_t rx_messages = 0; // Counter for the number of new messages received.
+uint8_t TransmitMailbox = 0; // Used for transmitting messages.
+
+/* Array for incomming messages, messages are stored in a row according to filter match
+ * indicator(FMI). 
+ */
+uint8_t Rx_Array[16][8];
 
 /* Function definitions ----------------------------------------------------------------*/
 

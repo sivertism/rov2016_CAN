@@ -9,10 +9,6 @@
   */
 
 /* Include -----------------------------------------------------------------------------*/
-#include "stm32f30x_can.h"
-#include "stm32f30x_rcc.h"
-#include "stm32f30x_gpio.h"
-#include "stm32f30x_misc.h"
 
 /* Private macro -----------------------------------------------------------------------*/
 
@@ -73,15 +69,14 @@
 #define CAN_RX_FILTER_14				CAN_RX_FILTER_NONE
 #define CAN_RX_FILTER_15				CAN_RX_FILTER_NONE
 
-/* Extended ID filters ********************************************************/
+/* Extended ID filters ******************************************************************/
 
-/* Private variables ---------------------------------------------------------*/
-CanRxMsg RxMsg;
-CanTxMsg TxMsg = {0};
-uint8_t rx_messages = 0;
-uint8_t TransmitMailbox = 0;
 
-/* Array for incomming messages, messages are stored according to filter match
- * indicator(FMI). */
-uint8_t Rx_Array[16][8];
+/* Exported function prototypes --------------------------------------------------------*/
+void CAN_Config(void);
+void CAN_IT_Config(void);
+uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
+uint8_t CAN_getRxMessages(void);
+uint16_t ADC1_getChannel(uint8_t channel);
+uint16_t ADC4_getChannel(uint8_t channel);
 
