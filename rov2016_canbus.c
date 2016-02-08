@@ -9,12 +9,12 @@
   */
 
 /* Include------------------------------------------------------------------------------*/
+#include "stm32f30x.h"
 #include "rov2016_canbus.h"
 #include "stm32f30x_can.h"
 #include "stm32f30x_rcc.h"
 #include "stm32f30x_gpio.h"
 #include "stm32f30x_misc.h"
-
 /* Global variables --------------------------------------------------------------------*/
 #include "extern_decl_global_vars.h"
 
