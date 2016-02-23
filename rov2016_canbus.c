@@ -287,7 +287,7 @@ void CAN_transmitAcceleration(int8_t *acc_array){
  * @param  int16_t q0, q1, q2, q3
  * @retval None.
  */
-void CAN_transmitQuaternions(int16_t q0, int16_t q1, int16_t q2, int16_t q3){
+extern void CAN_transmitQuaternions(int16_t q0, int16_t q1, int16_t q2, int16_t q3){
 	/* Toggle status LED */
 	GPIOE->ODR ^= CAN_TX_LED << 8;
 
