@@ -25,6 +25,7 @@
 #define SENSOR_ACCELERATION				(SENSOR_BASE + 2)
 #define SENSOR_DEPTH_TEMP				(SENSOR_BASE + 3)
 #define SENSOR_LEAKAGE_ALARM			(SENSOR_BASE + 4)
+#define SENSOR_AHRS_QUATERNIONS			(SENSOR_BASE + 5)
 
 #define POWR_BASE 						0x400
 #define POWR_STATUS						POWR_BASE
@@ -36,7 +37,7 @@
 #define POWR_ENCODER_TOW				(POWR_BASE + 6)
 #define POWR_CAM_PWM					(POWR_BASE + 7)
 #define POWR_PWM_MANIP_ONE				(POWR_BASE + 8)
-#define POWR_PWM_MANIP_TOW				(POWR_BASE + 9)
+#define POWR_PWM_MANIP_TWO				(POWR_BASE + 9)
 
 #define ESC_BASE						0x500
 #define ESC_1							ESC_BASE
