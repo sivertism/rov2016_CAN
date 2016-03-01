@@ -218,6 +218,7 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
 
 	/* Configure the message to be transmitted. */
 	TxMsg.StdId = StdId;
+	TxMsg.IDE = CAN_ID_EXT;
 	TxMsg.DLC = 1;
 	TxMsg.Data[0] = data;
 
@@ -228,6 +229,49 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
 	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }
 
+
+/**
+ * @brief  	Transmit buffer
+ * @param  	Id 		- ID of message to be sent.
+ * 			buffer 	- Pointer to a buffer containing bytes to be sent.
+ * 			length	- Length of packet to be sent. (in bytes).
+ * 			Id_Type - Identifier type, can be:
+ * 							CAN_ID_STD - Standard 11 bit identifier.
+ * 							CAN_ID_EXT - Extended 31 bit identifier.
+ * @retval 	None
+ */
+extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type){
+
+	if(length > 8){
+		return;
+	}
+
+	/* Prepare message to be sent */
+	TxMsg.IDE = Id_Type;
+	TxMsg.RTR = CAN_RTR_DATA;
+	TxMsg.DLC = length;
+
+	/* Load ID into message. */
+	if(Id_Type == CAN_ID_EXT){
+		TxMsg.StdId = (uint16_t)(Id >> 18); // Top 11 bits of the 31 bit identifier
+		TxMsg.ExtId = (uint32_t)(Id & 0x00003FFFF); // Bottom 18 bits of the identifier.
+	} else {
+		TxMsg.StdId = Id;
+		TxMsg.ExtId = 0;
+	}
+
+	/* Load data into message. */
+	volatile uint8_t i;
+	for(i=0; i<length; i++){
+		TxMsg.Data[i] = buffer[i];
+	}
+
+	/* Put message in Tx Mailbox and store the mailbox number. */
+	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
+
+	/* Wait on Transmit */
+	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
+}
 /**
  * @brief  Transmit SENSOR_AN_RAW package.
  * @param  None
