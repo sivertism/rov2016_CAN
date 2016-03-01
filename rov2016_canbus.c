@@ -241,7 +241,6 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
  * @retval 	None
  */
 extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type){
-
 	if(length > 8){
 		return;
 	}
@@ -272,6 +271,7 @@ extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t lengt
 	/* Wait on Transmit */
 	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }
+
 /**
  * @brief  Transmit SENSOR_AN_RAW package.
  * @param  None
