@@ -82,4 +82,4 @@ uint8_t CAN_getRxMessages(void);
 uint16_t ADC1_getChannel(uint8_t channel);
 uint16_t ADC4_getChannel(uint8_t channel);
 extern void CAN_transmitQuaternions(int16_t q0, int16_t q1, int16_t q2, int16_t q3);
-extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type);
+extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type);

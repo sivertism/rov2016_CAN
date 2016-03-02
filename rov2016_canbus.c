@@ -18,6 +18,8 @@
 /* Global variables --------------------------------------------------------------------*/
 #include "extern_decl_global_vars.h"
 
+/* Macro */
+//#define DEBUG_MODE
 
 /* Static Function declarations --------------------------------------------------------*/
 
@@ -240,10 +242,12 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
  * 							CAN_ID_EXT - Extended 31 bit identifier.
  * @retval 	None
  */
-extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type){
+extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type){
 	if(length > 8){
 		return;
 	}
+
+	GPIOE->ODR ^= CAN_TX_LED << 8;
 
 	/* Prepare message to be sent */
 	TxMsg.IDE = Id_Type;
@@ -260,10 +264,21 @@ extern void CAN_transmitBuffer_ExtId(uint32_t Id, uint8_t* buffer, uint8_t lengt
 	}
 
 	/* Load data into message. */
+#ifdef DEBUG_MODE
+	uint32_t payload =
+			((uint32_t)buffer[0] << 24) |
+			((uint32_t)buffer[1] << 16) |
+			((uint32_t)buffer[2] << 8)  |
+			(uint32_t)buffer[3];
+	printf("CAN transmitting on ID %d to ESC %d, 4-byte payload = %i: ",
+			Id, (uint8_t)(Id & 0xFF), payload);
+#endif
+
 	volatile uint8_t i;
 	for(i=0; i<length; i++){
 		TxMsg.Data[i] = buffer[i];
 	}
+
 
 	/* Put message in Tx Mailbox and store the mailbox number. */
 	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
