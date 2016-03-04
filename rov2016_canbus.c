@@ -24,10 +24,10 @@
 /* Static Function declarations --------------------------------------------------------*/
 
 /* Private variables -------------------------------------------------------------------*/
-CanRxMsg RxMsg;
-CanTxMsg TxMsg = {0};
-uint8_t rx_messages = 0; // Counter for the number of new messages received.
-uint8_t TransmitMailbox = 0; // Used for transmitting messages.
+static CanRxMsg RxMsg;
+static CanTxMsg TxMsg = {0};
+static uint8_t rx_messages = 0; // Counter for the number of new messages received.
+static uint8_t TransmitMailbox = 0; // Used for transmitting messages.
 
 /* Array for incomming messages, messages are stored in a row according to filter match
  * indicator(FMI). 
@@ -243,6 +243,7 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
  * @retval 	None
  */
 extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type){
+	/* Parameter check. */
 	if(length > 8){
 		return;
 	}
@@ -264,6 +265,25 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	}
 
 	/* Load data into message. */
+
+
+	volatile uint8_t i;
+	for(i=0; i<length; i++){
+		TxMsg.Data[i] = buffer[i];
+	}
+
+	/* Put message in Tx Mailbox and store the mailbox number.
+	 * Stall if no mailbox is available.
+	 */
+	TransmitMailbox = CAN_TxStatus_NoMailBox;
+	while(TransmitMailbox == CAN_TxStatus_NoMailBox){
+		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
+	}
+
+	/* Wait for transmit complete.*/
+//	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
+
+
 #ifdef DEBUG_MODE
 	uint32_t payload =
 			((uint32_t)buffer[0] << 24) |
@@ -273,18 +293,6 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	printf("CAN transmitting on ID %d to ESC %d, 4-byte payload = %i: ",
 			Id, (uint8_t)(Id & 0xFF), payload);
 #endif
-
-	volatile uint8_t i;
-	for(i=0; i<length; i++){
-		TxMsg.Data[i] = buffer[i];
-	}
-
-
-	/* Put message in Tx Mailbox and store the mailbox number. */
-	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
-
-	/* Wait on Transmit */
-	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }
 
 /**
