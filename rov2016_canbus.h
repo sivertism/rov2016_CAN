@@ -75,8 +75,8 @@
 
 
 /* Exported function prototypes --------------------------------------------------------*/
-void CAN_Config(void);
-void CAN_IT_Config(void);
-uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
-uint8_t CAN_getRxMessages(void);
+extern void CAN_init(void);
+extern uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
+extern uint8_t CAN_getRxMessages(void);
 extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type);
+extern void CAN_transmitByte(uint16_t StdId, uint8_t data);

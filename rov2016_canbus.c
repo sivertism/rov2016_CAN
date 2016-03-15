@@ -39,7 +39,7 @@ uint8_t Rx_Array[16][8];
  * @param  None
  * @retval None
  */
-void CAN_Config(void){
+void CAN_init(void){
 	GPIO_InitTypeDef  		GPIO_InitStructure;
 	CAN_InitTypeDef       	CAN_InitStructure;
 	CAN_FilterInitTypeDef 	CAN_FilterInitStructure;
