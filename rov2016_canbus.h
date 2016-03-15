@@ -1,10 +1,10 @@
 /**
   **************************************************************************************
-  * @file    CAN_metoder.h
+  * @file    rov2016_canbus.h
   * @author  Sivert Sliper, Stian Soerensen
-  * @version V01
-  * @date    03-February-2016
-  * @brief   This file contains local variables and macros for CAN_metoder.c
+  * @version V1.0
+  * @date    3-February-2016
+  * @brief   This file contains local variables and macros for rov2016_canbus.c
   **************************************************************************************
   */
 
@@ -79,7 +79,4 @@ void CAN_Config(void);
 void CAN_IT_Config(void);
 uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
 uint8_t CAN_getRxMessages(void);
-uint16_t ADC1_getChannel(uint8_t channel);
-uint16_t ADC4_getChannel(uint8_t channel);
-extern void CAN_transmitQuaternions(int16_t q0, int16_t q1, int16_t q2, int16_t q3);
 extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uint8_t Id_Type);

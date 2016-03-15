@@ -1,6 +1,6 @@
 /**
  **************************************************************************************
- * @file    CAN_metoder.c
+ * @file    rov2016_canbus.c
  * @author  Sivert Sliper, Stian Soerensen
  * @version V1.0
  * @date    3-February-2016
@@ -18,9 +18,6 @@
 /* Global variables --------------------------------------------------------------------*/
 #include "extern_decl_global_vars.h"
 
-/* Macro */
-//#define DEBUG_MODE
-
 /* Static Function declarations --------------------------------------------------------*/
 
 /* Private variables -------------------------------------------------------------------*/
@@ -29,7 +26,7 @@ static CanTxMsg TxMsg = {0};
 static uint8_t rx_messages = 0; // Counter for the number of new messages received.
 static uint8_t TransmitMailbox = 0; // Used for transmitting messages.
 
-/* Array for incomming messages, messages are stored in a row according to filter match
+/* Array for incoming messages, messages are stored in a row according to filter match
  * indicator(FMI). 
  */
 uint8_t Rx_Array[16][8];
@@ -38,7 +35,7 @@ uint8_t Rx_Array[16][8];
 
 /**
  * @brief  Configures the CAN-Controller peripheral for 500 kbps communication.
- * 		   Also configures Rx filters according to ID's specified in "can_metoder.h"
+ * 		   Also configures Rx filters according to ID's specified in "rov2016_canbus.h"
  * @param  None
  * @retval None
  */
@@ -87,19 +84,8 @@ void CAN_Config(void){
 	CAN_InitStructure.CAN_BS2 = CAN_BS2_6tq;
 	CAN_InitStructure.CAN_Prescaler = 4; // 36MHz/4 = 9 MHz
 
-	/* Status LED's */
-	GPIOE->ODR = 1u << 8;
-
-	/* Initalize the CAN controller and flash LED's according to success/fail */
-	uint8_t can_success = CAN_Init(CAN1, &CAN_InitStructure);
-	if (can_success == CAN_InitStatus_Success){
-		GPIOE->ODR = 0xFF << 8; // All LED's on if success.
-	} else {
-		GPIOE->ODR = 0x44 << 8; // 2 LED's on if fail.
-	}
-	uint32_t pausetimer = 0xFFFFF;
-	while(pausetimer-->0); //small pause to check LED's
-
+	/* Initalize the CAN controller */
+	CAN_Init(CAN1, &CAN_InitStructure);
 
 	/* CAN filter init *****************************************************************/
 	CAN_FilterInitStructure.CAN_FilterNumber = 0; // [0...13]
@@ -151,7 +137,6 @@ void CAN_Config(void){
 	NVIC_Init(&NVIC_InitStructure);
 
 	/* Initialize a standard transmit message */
-
 	TxMsg.IDE = CAN_ID_STD;
 	TxMsg.StdId = 0x301;
 	TxMsg.ExtId = 0x00;
@@ -177,9 +162,9 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 
 	if (bytes == 0) return; // Return if message is empty.
 
-	while(bytes-->0){
+	do{
 		Rx_Array[RxMsg.FMI][bytes-1] = RxMsg.Data[bytes-1];
-	}
+	}while(--bytes>0);
 
 	/* Increment message received counter */
 	rx_messages++;
@@ -220,7 +205,9 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
 
 	/* Configure the message to be transmitted. */
 	TxMsg.StdId = StdId;
-	TxMsg.IDE = CAN_ID_EXT;
+	TxMsg.ExtId = 0x00;
+	TxMsg.RTR = CAN_RTR_DATA;
+	TxMsg.IDE = CAN_ID_STD;
 	TxMsg.DLC = 1;
 	TxMsg.Data[0] = data;
 
@@ -265,8 +252,6 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	}
 
 	/* Load data into message. */
-
-
 	volatile uint8_t i;
 	for(i=0; i<length; i++){
 		TxMsg.Data[i] = buffer[i];
@@ -282,98 +267,4 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 
 	/* Wait for transmit complete.*/
 //	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
-
-
-#ifdef DEBUG_MODE
-	uint32_t payload =
-			((uint32_t)buffer[0] << 24) |
-			((uint32_t)buffer[1] << 16) |
-			((uint32_t)buffer[2] << 8)  |
-			(uint32_t)buffer[3];
-	printf("CAN transmitting on ID %d to ESC %d, 4-byte payload = %i: ",
-			Id, (uint8_t)(Id & 0xFF), payload);
-#endif
-}
-
-/**
- * @brief  Transmit SENSOR_AN_RAW package.
- * @param  None
- * @retval The number of unprocessed messages (uint8_t).
- */
-void CAN_transmit_AN_RAW(void){
-	/* Toggle status LED */
-	GPIOE->ODR ^= CAN_TX_LED << 8;
-
-	/* Configure the message to be transmitted. */
-	TxMsg.StdId = SENSOR_AN_RAW;
-	TxMsg.DLC = 8;
-	TxMsg.IDE = CAN_ID_STD;
-	TxMsg.RTR = CAN_RTR_DATA;
-
-	TxMsg.Data[0] = (uint8_t) (ADC4_getChannel(0) & 0xFF);
-	TxMsg.Data[1] = (uint8_t) (ADC4_getChannel(0) >> 8);
-	TxMsg.Data[2] = (uint8_t) (ADC1_getChannel(1) & 0xFF);
-	TxMsg.Data[3] = (uint8_t) (ADC1_getChannel(1) >> 8);
-	TxMsg.Data[4] = (uint8_t) (ADC1_getChannel(2) & 0xFF);
-	TxMsg.Data[5] = (uint8_t) (ADC1_getChannel(2) >> 8);
-	TxMsg.Data[6] = (uint8_t) (ADC1_getChannel(3) & 0xFF);
-	TxMsg.Data[7] = (uint8_t) (ADC1_getChannel(3) >> 8);
-
-	/* Put message in Tx Mailbox and store the mailbox number. */
-	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
-
-	/* Wait for Transmit */
-	while(CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok);
-}
-
-/**
- * @brief  Transmit acceleration measurements in all 3 axes.
- * @param  Pointer to an array of dimension 6 containing measurements.
- * @retval None
- */
-void CAN_transmitAcceleration(int8_t *acc_array){
-	/* Toggle status LED */
-	GPIOE->ODR ^= CAN_TX_LED << 8;
-
-	/* Configure the message to be transmitted. */
-	TxMsg.StdId = SENSOR_ACCELERATION;
-	TxMsg.DLC = 6;
-
-	uint8_t i = 0;
-	for(i=0;i<6;i++) TxMsg.Data[i] = *acc_array++;
-
-	/* Put message in Tx Mailbox and store the mailbox number. */
-	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
-
-	/* Wait on Transmit */
-	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
-}
-
-/**
- * @brief  Transmit 4 quaternions as 4 int16_t split into 8 bytes.
- * @param  int16_t q0, q1, q2, q3
- * @retval None.
- */
-extern void CAN_transmitQuaternions(int16_t q0, int16_t q1, int16_t q2, int16_t q3){
-	/* Toggle status LED */
-	GPIOE->ODR ^= CAN_TX_LED << 8;
-
-	/* Configure the message to be transmitted. */
-	TxMsg.StdId = SENSOR_AHRS_QUATERNIONS;
-	TxMsg.DLC = 8;
-
-	TxMsg.Data[0] = (uint8_t)(q0 >> 8u);
-	TxMsg.Data[1] = (uint8_t)(q0 & 0xFF);
-	TxMsg.Data[2] = (uint8_t)(q1 >> 8u);
-	TxMsg.Data[3] = (uint8_t)(q1 & 0xFF);
-	TxMsg.Data[4] = (uint8_t)(q2 >> 8u);
-	TxMsg.Data[5] = (uint8_t)(q2 & 0xFF);
-	TxMsg.Data[6] = (uint8_t)(q3 >> 8u);
-	TxMsg.Data[7] = (uint8_t)(q3 & 0xFF);
-
-	/* Put message in Tx Mailbox and store the mailbox number. */
-	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
-
-	/* Wait on Transmit */
-	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }
