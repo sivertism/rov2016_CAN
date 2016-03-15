@@ -1,6 +1,6 @@
 /**
   **************************************************************************************
-  * @file    ADC_metoder.h
+  * @file    CAN_metoder.h
   * @author  Sivert Sliper, Stian Soerensen
   * @version V01
   * @date    03-February-2016
