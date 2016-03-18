@@ -44,37 +44,6 @@
 #define ESC_BASE						0x500
 #define ESC_1							ESC_BASE
 
-
-/* Standard ID filters ******************************************************************/
-#define CAN_RX_FILTER_NONE				0x7FF
-
-/* Filter bank 0 */
-#define CAN_RX_FILTER_0					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_1					TOP_XBOX_CTRLS
-#define CAN_RX_FILTER_2					TOP_XBOX_AXES
-#define CAN_RX_FILTER_3					CAN_RX_FILTER_NONE
-
-/* Filter bank 1 */
-#define CAN_RX_FILTER_4					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_5					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_6					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_7					CAN_RX_FILTER_NONE
-
-/* Filter bank 3 */
-#define CAN_RX_FILTER_8					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_9					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_10				CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_11				CAN_RX_FILTER_NONE
-
-/* Filter bank 4 */
-#define CAN_RX_FILTER_12				CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_13				CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_14				CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_15				CAN_RX_FILTER_NONE
-
-/* Extended ID filters ******************************************************************/
-
-
 /* Exported function prototypes --------------------------------------------------------*/
 extern void CAN_init(void);
 extern uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number);
