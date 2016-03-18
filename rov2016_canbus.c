@@ -129,7 +129,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 
 	/* Increment message received counter */
 	rx_messages++;
-	printf("FMI:%d", RxMsg.FMI);
 
 	/* Indicating message received.*/
 	GPIOE->ODR ^= CAN_RX_LED << 8; // Flip receive-LED.
