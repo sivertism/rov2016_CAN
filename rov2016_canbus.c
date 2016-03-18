@@ -135,6 +135,11 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 	GPIOE->ODR ^= CAN_RX_LED << 8; // Flip receive-LED.
 }
 
+/**
+ * @brief  Adds a standard identifier to the receive filter bank.
+ * @param  Standard identifier(11 bit) to be added to the filter bank.
+ * @retval The filter match index given to the added identifier.
+ */
 extern uint8_t CAN_addRxFilter(uint16_t StdId){
 	if(FMI_counter > 55) return;
 
