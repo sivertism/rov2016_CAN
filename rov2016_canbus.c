@@ -25,6 +25,7 @@ static CanRxMsg RxMsg;
 static CanTxMsg TxMsg = {0};
 static uint8_t rx_messages = 0; // Counter for the number of new messages received.
 static uint8_t TransmitMailbox = 0; // Used for transmitting messages.
+static uint8_t FMI_counter = 0;
 
 /* Array for incoming messages, messages are stored in a row according to filter match
  * indicator(FMI). 
@@ -42,7 +43,6 @@ uint8_t Rx_Array[16][8];
 void CAN_init(void){
 	GPIO_InitTypeDef  		GPIO_InitStructure;
 	CAN_InitTypeDef       	CAN_InitStructure;
-	CAN_FilterInitTypeDef 	CAN_FilterInitStructure;
 	NVIC_InitTypeDef		NVIC_InitStructure;
 
 
@@ -87,45 +87,6 @@ void CAN_init(void){
 	/* Initalize the CAN controller */
 	CAN_Init(CAN1, &CAN_InitStructure);
 
-	/* CAN filter init *****************************************************************/
-	CAN_FilterInitStructure.CAN_FilterNumber = 0; // [0...13]
-	CAN_FilterInitStructure.CAN_FilterMode = CAN_FilterMode_IdList;
-	CAN_FilterInitStructure.CAN_FilterScale = CAN_FilterScale_16bit;
-
-	/* Setting hardware filtering of incomming messages. Using 16-bit list mode
-	 * allows 4 11-bit ID's to be compared. The mask-filters are also used as
-	 *  ID's.
-	 *
-	 * => 4 ID's per filter => maximum 4x14 = 56 message ID's total.
-	 *
-	 * Mapping: StdID[10:0]-RTR-IDE-EXID[17-15] ref. figure 391 RM0316.
-	 * */
-
-	/*Filter Match Index 0*/
-	CAN_FilterInitStructure.CAN_FilterIdLow = 		  (CAN_RX_FILTER_0 << 5) \
-			| (CAN_RTR_DATA << 4)	 \
-			| (CAN_ID_STD << 3);
-	/*Filter Match Index 1*/
-	CAN_FilterInitStructure.CAN_FilterMaskIdLow = 	  (CAN_RX_FILTER_1 << 5) \
-			| (CAN_RTR_DATA << 4)	 \
-			| (CAN_ID_STD << 3);
-
-	/*Filter Match Index 2*/
-	CAN_FilterInitStructure.CAN_FilterIdHigh = 		  (CAN_RX_FILTER_2 << 5) \
-			| (CAN_RTR_DATA << 4)	 \
-			| (CAN_ID_STD << 3); // Filt. no. 2
-
-	/*Filter Match Index 3*/
-	CAN_FilterInitStructure.CAN_FilterMaskIdHigh = 	  (CAN_RX_FILTER_3 << 5) \
-			| (CAN_RTR_DATA << 4)	 \
-			| (CAN_ID_STD << 3);
-
-
-	CAN_FilterInitStructure.CAN_FilterFIFOAssignment = CAN_FIFO0; // Rx-buffer
-	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
-
-	CAN_FilterInit(&CAN_FilterInitStructure);
-
 	/* Enable FIFO 0 message pending Interrupt */
 	CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
 
@@ -168,9 +129,59 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 
 	/* Increment message received counter */
 	rx_messages++;
+	printf("FMI:%d", RxMsg.FMI);
 
 	/* Indicating message received.*/
 	GPIOE->ODR ^= CAN_RX_LED << 8; // Flip receive-LED.
+}
+
+extern uint8_t CAN_addRxFilter(uint16_t StdId){
+	if(FMI_counter > 55) return;
+
+	CAN_FilterInitTypeDef FilterStruct;
+
+	/* Setting hardware filtering of incomming messages. Using 16-bit list mode
+	 * allows 4 11-bit ID's to be compared. The mask-filters are also used as
+	 *  ID's.
+	 *
+	 * => 4 ID's per filter => maximum 4x14 = 56 message ID's total.
+	 *
+	 * Mapping: StdID[10:0]-RTR-IDE-EXID[17-15] ref. figure 391 RM0316.
+	 * */
+
+	FilterStruct.CAN_FilterMode = CAN_FilterMode_IdList;
+	FilterStruct.CAN_FilterScale = CAN_FilterScale_16bit;
+	FilterStruct.CAN_FilterFIFOAssignment = CAN_FIFO0;
+	FilterStruct.CAN_FilterActivation = ENABLE;
+	FilterStruct.CAN_FilterNumber = FMI_counter/4;
+
+	uint8_t f_index = FMI_counter % 4;
+	switch(f_index){
+	case 0:
+		FilterStruct.CAN_FilterIdLow = 		  (StdId << 5) \
+											| (CAN_RTR_DATA << 4)	 \
+											| (CAN_ID_STD << 3);
+		break;
+	case 1:
+		FilterStruct.CAN_FilterMaskIdLow =    (StdId << 5) \
+											| (CAN_RTR_DATA << 4)	 \
+											| (CAN_ID_STD << 3);
+		break;
+	case 2:
+		FilterStruct.CAN_FilterIdHigh =		  (StdId << 5) \
+											| (CAN_RTR_DATA << 4)	 \
+											| (CAN_ID_STD << 3);
+		break;
+	case 3:
+		FilterStruct.CAN_FilterMaskIdHigh =   (StdId << 5) \
+											| (CAN_RTR_DATA << 4)	 \
+											| (CAN_ID_STD << 3);
+		break;
+	}
+
+	CAN_FilterInit(&FilterStruct);
+	FMI_counter++;
+	return FMI_counter - 1;
 }
 
 /**
@@ -178,7 +189,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
  * @param  None
  * @retval The number of unprocessed messages (uint8_t).
  */
-uint8_t CAN_getRxMessages(void){
+extern uint8_t CAN_getRxMessages(void){
 	return rx_messages;
 }
 
@@ -235,7 +246,7 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 		return;
 	}
 
-	GPIOE->ODR ^= CAN_TX_LED << 8;
+	//	GPIOE->ODR ^= CAN_TX_LED << 8;
 
 	/* Prepare message to be sent */
 	TxMsg.IDE = Id_Type;
@@ -266,5 +277,5 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	}
 
 	/* Wait for transmit complete.*/
-//	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
+	//	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }

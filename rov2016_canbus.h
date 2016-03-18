@@ -16,9 +16,9 @@
 
 /* ID list, RANGE = [0...0x7FF] *********************************************************/
 
-#define TOPSIDE_BASE 					0x200
-#define TOPSIDE_JOYSTICK				TOPSIDE_BASE
-#define TOPSIDE_COMMANDS				(TOPSIDE_BASE + 1)
+#define TOP_BASE 						0x200
+#define TOP_XBOX_CTRLS					TOP_BASE
+#define TOP_XBOX_AXES					(TOP_BASE + 1)
 
 #define SENSOR_BASE 					0x300
 #define SENSOR_AN_RAW					SENSOR_BASE
@@ -27,6 +27,7 @@
 #define SENSOR_DEPTH_TEMP				(SENSOR_BASE + 3)
 #define SENSOR_LEAKAGE_ALARM			(SENSOR_BASE + 4)
 #define SENSOR_AHRS_QUATERNIONS			(SENSOR_BASE + 5)
+#define SENSOR_ALIVE					(SENSOR_BASE + 6)
 
 #define POWR_BASE 						0x400
 #define POWR_STATUS						POWR_BASE
@@ -49,8 +50,8 @@
 
 /* Filter bank 0 */
 #define CAN_RX_FILTER_0					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_1					CAN_RX_FILTER_NONE
-#define CAN_RX_FILTER_2					SENSOR_PROCESSED_DATA
+#define CAN_RX_FILTER_1					TOP_XBOX_CTRLS
+#define CAN_RX_FILTER_2					TOP_XBOX_AXES
 #define CAN_RX_FILTER_3					CAN_RX_FILTER_NONE
 
 /* Filter bank 1 */
