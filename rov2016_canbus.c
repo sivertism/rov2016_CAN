@@ -135,12 +135,13 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 }
 
 /**
- * @brief  Adds a standard identifier to the receive filter bank.
- * @param  Standard identifier(11 bit) to be added to the filter bank.
- * @retval The filter match index given to the added identifier.
+ * @brief  	Adds a standard identifier to the receive filter bank.
+ * @param  	Standard identifier(11 bit) to be added to the filter bank.
+ * @retval 	The filter match index given to the added identifier.
+ * 			Returns 255 if filter bank is full.
  */
 extern uint8_t CAN_addRxFilter(uint16_t StdId){
-	if(FMI_counter > 55) return;
+	if(FMI_counter > 55) return 255;
 
 	CAN_FilterInitTypeDef FilterStruct;
 
@@ -226,11 +227,20 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
 	TxMsg.DLC = 1;
 	TxMsg.Data[0] = data;
 
-	/* Put message in Tx Mailbox and store the mailbox number. */
-	TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
-
-	/* Wait on Transmit */
-	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
+	/* Put message in Tx Mailbox and store the mailbox number.
+	 * Stall for a while (<1 second) if no mailbox is available.
+	 */
+	TransmitMailbox = CAN_TxStatus_NoMailBox;
+	volatile uint32_t watchdog = 2000000;
+	while(1){
+		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
+		if(TransmitMailbox != CAN_TxStatus_NoMailBox){
+			break;
+		} else if(watchdog--<10){
+			/* Return if no mailbox available within a few 100's of milliseconds. */
+			return;
+		}
+	}
 }
 
 
@@ -273,13 +283,18 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	}
 
 	/* Put message in Tx Mailbox and store the mailbox number.
-	 * Stall if no mailbox is available.
+	 * Stall for a while (<1 second) if no mailbox is available.
 	 */
 	TransmitMailbox = CAN_TxStatus_NoMailBox;
-	while(TransmitMailbox == CAN_TxStatus_NoMailBox){
+	volatile uint32_t watchdog = 2000000;
+	while(1){
 		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
+		if(TransmitMailbox != CAN_TxStatus_NoMailBox){
+			break;
+		} else if(watchdog--<10){
+			/* Return if no mailbox available within a few 100's of milliseconds. */
+			return;
+		}
 	}
 
-	/* Wait for transmit complete.*/
-	//	while((CAN_TransmitStatus(CAN1, TransmitMailbox) != CAN_TxStatus_Ok));
 }
