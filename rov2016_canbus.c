@@ -199,14 +199,24 @@ extern uint8_t CAN_getRxMessages(void){
 }
 
 /**
+ * @brief  	Returns a pointer to a specified message.
+ * @param  	uint8_t filter_number: 	Specify which filter match index the wanted
+ * 									message belongs to.
+ * @retval  Pointer to the specified messagebuffer.
+ */
+extern uint8_t* CAN_getMessagePointer(uint8_t filter_number){
+	return &Rx_Array[filter_number][0];
+}
+
+/**
  * @brief  	Returns the specified byte from the Rx array.
- * @param  	uint8_t filter_number: 	Specify which filter index the wanted
+ * @param  	uint8_t filter_number: 	Specify which filter match index the wanted
  * 									message belongs to.
  * @param	uint8_t byte_number:	Specify where the wanted byte is in the
  * 									data field of the received message.
  * @retval 	The specified byte.
  */
-uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number){
+extern uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number){
 	return Rx_Array[filter_number][byte_number];
 }
 
