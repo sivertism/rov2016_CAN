@@ -241,7 +241,7 @@ void CAN_transmitByte(uint16_t StdId, uint8_t data){
 	 * Stall for a while (<1 second) if no mailbox is available.
 	 */
 	TransmitMailbox = CAN_TxStatus_NoMailBox;
-	volatile uint32_t watchdog = 2000000;
+	volatile uint32_t watchdog = 200000;
 	while(1){
 		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
 		if(TransmitMailbox != CAN_TxStatus_NoMailBox){
@@ -296,7 +296,7 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 	 * Stall for a while (<1 second) if no mailbox is available.
 	 */
 	TransmitMailbox = CAN_TxStatus_NoMailBox;
-	volatile uint32_t watchdog = 2000000;
+	volatile uint32_t watchdog = 200000;
 	while(1){
 		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
 		if(TransmitMailbox != CAN_TxStatus_NoMailBox){
