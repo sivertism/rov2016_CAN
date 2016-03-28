@@ -225,7 +225,7 @@ extern uint8_t CAN_getByteFromMessage(uint8_t filter_number, uint8_t byte_number
  * @param  None
  * @retval The number of unprocessed messages (uint8_t).
  */
-void CAN_transmitByte(uint16_t StdId, uint8_t data){
+extern void CAN_transmitByte(uint16_t StdId, uint8_t data){
 	/* Toggle status LED */
 	GPIOE->ODR ^= CAN_TX_LED << 8;
 
@@ -307,4 +307,38 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 		}
 	}
 
+}
+
+
+/**
+ * @brief  Transmit byte with extended identifier.
+ * @param  None
+ * @retval The number of unprocessed messages (uint8_t).
+ */
+extern void CAN_transmitByte_EID(uint32_t EID, uint8_t data){
+	/* Toggle status LED */
+	GPIOE->ODR ^= CAN_TX_LED << 8;
+
+	/* Configure the message to be transmitted. */
+	TxMsg.StdId = 0;
+	TxMsg.ExtId = EID;
+	TxMsg.RTR = CAN_RTR_DATA;
+	TxMsg.IDE = CAN_ID_EXT;
+	TxMsg.DLC = 1;
+	TxMsg.Data[0] = data;
+
+	/* Put message in Tx Mailbox and store the mailbox number.
+	 * Stall for a while (<1 second) if no mailbox is available.
+	 */
+	TransmitMailbox = CAN_TxStatus_NoMailBox;
+	volatile uint32_t watchdog = 200000;
+	while(1){
+		TransmitMailbox = CAN_Transmit(CAN1, &TxMsg);
+		if(TransmitMailbox != CAN_TxStatus_NoMailBox){
+			break;
+		} else if(watchdog--<10){
+			/* Return if no mailbox available within a few 100's of milliseconds. */
+			return;
+		}
+	}
 }
