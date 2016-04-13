@@ -28,7 +28,7 @@ typedef enum {
 	CAN_PACKET_STATUS,
 	CAN_PACKET_GET_CURRENT,
 	CAN_PACKET_GET_RPM,
-	CAN_PACKET_GET_MOSFET_TEMP
+	CAN_PACKET_GET_TEMP_VOLT
 } CAN_PACKET_ID;
 
 #define TOP_BASE 						0x200
@@ -61,7 +61,7 @@ typedef enum {
 #define VESC_BASE						0x500
 #define VESC_CURRENT_BASE				0x500
 #define VESC_RPM_BASE					0x510
-#define VESC_MOSFET_TEMP_BASE			0x520
+#define VESC_TEMP_VOLT_BASE				0x520
 
 /* Exported function prototypes --------------------------------------------------------*/
 extern void CAN_init(void);
@@ -71,4 +71,7 @@ extern void CAN_transmitBuffer(uint32_t Id, uint8_t* buffer, uint8_t length, uin
 extern void CAN_transmitByte(uint16_t StdId, uint8_t data);
 extern void CAN_transmitByte_EID(uint32_t EID, uint8_t data);
 extern uint8_t* CAN_getMessagePointer(uint8_t filter_number);
+extern uint8_t CAN_addRxFilter(uint16_t StdId);
+extern void CAN_deleteRxByte(uint8_t fmi, uint8_t byte_number);
+
 

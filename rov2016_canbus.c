@@ -342,3 +342,13 @@ extern void CAN_transmitByte_EID(uint32_t EID, uint8_t data){
 		}
 	}
 }
+
+/**
+ * @brief  	Clear one byte from the receive message.
+ * @param  	fmi: Filter match index of message to be cleared.
+ * @param 	byte_number: Which byte to clear.
+ * @retval 	None
+ */
+extern void CAN_deleteRxByte(uint8_t fmi, uint8_t byte_number){
+	rx_messages[fmi][byte_number] = 0;
+}
