@@ -350,5 +350,5 @@ extern void CAN_transmitByte_EID(uint32_t EID, uint8_t data){
  * @retval 	None
  */
 extern void CAN_deleteRxByte(uint8_t fmi, uint8_t byte_number){
-	rx_messages[fmi][byte_number] = 0;
+	Rx_Array[fmi][byte_number] = 0;
 }
