@@ -37,10 +37,7 @@ typedef enum {
 #define TOP_PWR_CTRL					(TOP_BASE + 2)
 #define TOP_REG_PARAM1					(TOP_BASE + 3)
 #define TOP_REG_PARAM2					(TOP_BASE + 4)
-
-/***/
 #define TOP_SENS_CTRL					(TOP_BASE + 5)
-/***/
 
 #define SENSOR_BASE 					0x300
 #define SENSOR_AN_RAW					SENSOR_BASE
