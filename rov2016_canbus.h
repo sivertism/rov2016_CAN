@@ -49,6 +49,7 @@ typedef enum {
 #define SENSOR_ALIVE					(SENSOR_BASE + 6)
 #define SENSOR_AHRS						(SENSOR_BASE + 7)
 #define SENSOR_CURR_TEST				(SENSOR_BASE + 8)
+#define SENSOR_TEMP						(SENSOR_BASE + 9)
 
 #define POWR_BASE 						0x400
 #define POWR_STATUS						POWR_BASE
