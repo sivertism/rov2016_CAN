@@ -52,6 +52,7 @@ typedef enum {
 #define SENSOR_TEMP						(SENSOR_BASE + 9)
 #define SENSOR_MAGNETIC_FIELD			(SENSOR_BASE + 10)
 #define SENSOR_ANGULAR_VELOCITY			(SENSOR_BASE + 11)
+#define SENSOR_THRUSTER_DUTY			(SENSOR_BASE + 12)
 
 #define POWR_BASE 						0x400
 #define POWR_STATUS						POWR_BASE
